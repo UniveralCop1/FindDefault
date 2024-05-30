@@ -1,0 +1,127 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+credited_card_df = pd.read_csv('Creditcard.csv')
+credited_card_df.shape
+
+credited_card_df.columns
+
+credited_card_df.head()
+
+credited_card_df.describe()
+
+credited_card_df.isnull().values.any()
+
+credited_card_df.info()
+
+credited_card_df_fraud = credited_card_df[credited_card_df['Class'] == 1] # Recovery of fraud data
+plt.figure(figsize=(16,8))
+plt.scatter(credited_card_df_fraud['Time'], credited_card_df_fraud['Amount']) # Display fraud amounts according to their time
+plt.title('Scratter plot amount fraud')
+plt.xlabel('Time')
+plt.ylabel('Amount')
+plt.xlim([0,175000])
+plt.ylim([0,2500])
+plt.show()
+
+credited_card_df_number_fraud = len(credited_card_df[credited_card_df.Class == 1])
+number_no_fraud = len(credited_card_df[credited_card_df.Class == 0])
+print('There are only '+ str(credited_card_df_number_fraud) + ' frauds in the original dataset, even though there are ' + str(number_no_fraud) +' no frauds in the dataset.')
+
+credited_card_df_corr = credited_card_df.corr()
+
+import seaborn
+plt.figure(figsize=(16,8))
+seaborn.heatmap(credited_card_df_corr, cmap="YlGnBu") # Displaying the Heatmap
+seaborn.set(font_scale=2,style='white')
+
+plt.title('Heatmap correlation')
+plt.show()
+
+Fraud = credited_card_df[credited_card_df['Class']==1]
+Normal = credited_card_df[credited_card_df['Class']==0]
+
+pd.concat([Normal.Amount.describe(), Normal.Time.describe()],  axis=1)
+
+pd.concat([Fraud.Amount.describe(), Fraud.Time.describe()],  axis=1)
+
+print('Fraud Shape:\t', Fraud.shape)
+print('Normal Shape:\t', Normal.shape)
+
+from sklearn.preprocessing import StandardScaler, RobustScaler
+
+std_scaler = StandardScaler()
+rob_scaler = RobustScaler()
+
+credited_card_df['amount_scale'] = rob_scaler.fit_transform(credited_card_df['Amount'].values.reshape(-1,1))
+credited_card_df['time_scale'] = rob_scaler.fit_transform(credited_card_df['Time'].values.reshape(-1,1))
+
+credited_card_df.drop(['Time','Amount'], axis=1, inplace=True)
+
+amount_scale = credited_card_df['amount_scale']
+time_scale = credited_card_df['time_scale']
+
+credited_card_df.drop(['amount_scale', 'time_scale'], axis=1, inplace=True)
+credited_card_df.insert(0, 'amount_scale', amount_scale)
+credited_card_df.insert(1, 'time_scale', time_scale)
+
+credited_card_df.head()
+
+credited_card_df =credited_card_df.sample(frac=1)
+
+fraud = credited_card_df.loc[credited_card_df['Class'] == 1]
+normal = credited_card_df.loc[credited_card_df['Class'] == 0][:492]
+
+normal_distributed_data = pd.concat([fraud, normal])
+
+sample_data = normal_distributed_data.sample(frac=1, random_state=42)
+
+sample_data.head()
+
+sample_data.shape
+
+#SVM Model Building
+
+X = sample_data.drop('Class', axis=1)
+y = sample_data['Class']
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+from sklearn.svm import SVC
+svm_model = SVC()
+
+svm_params = {"C": np.arange(1,10), "kernel":["linear", "rbf"]}
+
+from sklearn.model_selection import GridSearchCV
+svm_cv_model = GridSearchCV(svm_model, svm_params, cv=7, n_jobs=-1, verbose=7).fit(X_train, y_train)
+
+svm_cv_model.best_score_
+
+best_params = svm_cv_model.best_params_
+print(best_params)
+
+svm = SVC(C = best_params['C'], kernel=best_params['kernel'], probability=True).fit(X_train, y_train)
+
+y_pred_svm = svm.predict(X_test)
+
+from sklearn.metrics import accuracy_score
+accuracy_score(y_test, y_pred_svm)
+
+from sklearn.model_selection import cross_val_score
+cross_val_score(svm, X_test, y_test, cv=21).mean()
+
+from sklearn.metrics import classification_report
+print(classification_report(y_test, y_pred_svm))
+
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, y_pred_svm)
+sns.heatmap(cm, annot=True, fmt="d", cbar=False)
+plt.title('SVC Confusion Matrix')
+plt.savefig('svc_con_mat')
+plt.show()
+
+
+
