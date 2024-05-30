@@ -40,6 +40,12 @@ In this project we want to identify fraudulent transactions with Credit Cards. O
 - Generating informative and visually appealing plots and figures
 - Combining visualizations and insights to tell a story with the data
 
+**Some Screenshots**
+![Screenshot 2024-05-29 224405](https://github.com/UniveralCop1/FindDefault/assets/170419127/99501bab-ecdd-4596-801c-aadc4e2114ae)
+![Screenshot 2024-05-29 224436](https://github.com/UniveralCop1/FindDefault/assets/170419127/97a074d4-2902-451f-b047-ab26ad1b0bae)
+![Screenshot 2024-05-29 225058](https://github.com/UniveralCop1/FindDefault/assets/170419127/8161cf6a-0738-44c4-9f20-09ca06b5b4b1)
+![Screenshot 2024-05-29 225114](https://github.com/UniveralCop1/FindDefault/assets/170419127/12c9e2f9-f434-4859-a1c5-b3e97e94e1ff)
+
 # Results
 The classification report indicates that the SVM model has performed well in identifying both the non-fraud and fraud transactions, with high precision, recall, and F1-score for both classes.
 The overall accuracy of the SVM model is 0.99, meaning that it correctly classified 99% of the transactions in the test set.
